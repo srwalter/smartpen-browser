@@ -4,10 +4,39 @@ import gtk
 import pysmartpen
 import xml.dom.minidom
 
+class Notebook(object):
+    def __init__(self, notebook, guid, title):
+        self.guid = guid
+        self.title = title
+
+        child = gtk.Label(guid)
+        child.show()
+        tab = gtk.Label(title)
+        tab.show()
+        notebook.append_page(child, tab)
+
 class SmartpenBrowser(object):
     def pen_connect(self, *args):
         self.pen.connect()
         self.connected = True
+
+        changes = self.pen.get_changelist()
+        dom = xml.dom.minidom.parseString(changes)
+        cl = dom.getElementsByTagName('changelist')[0]
+
+        notebooks = []
+        tabs = self.builder.get_object('notebook1')
+
+        for elm in cl.getElementsByTagName('lsp'):
+            guid = elm.getAttribute('guid')
+            if not guid:
+                continue
+            print guid
+
+            title = elm.getAttribute('title')
+            nb = Notebook(tabs, guid, title)
+            notebooks.append(nb)
+        print notebooks
 
     def pen_disconnect(self, *args):
         self.pen.disconnect()
