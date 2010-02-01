@@ -38,6 +38,7 @@ class Notebook(object):
         self.title = title
         self.pen = pen
         self.pages = pages
+        self.is_rendered = False
 
         ls = gtk.ListStore(str, gtk.gdk.Pixbuf)
         self.ls = ls
@@ -60,16 +61,23 @@ class Notebook(object):
         notebook.append_page(self.contents, tab)
 
     def render(self):
+        if is_rendered is True:
+            return
+
+        # XXX: cleanup temp file
         fd, tmpfile = tempfile.mkstemp()
         print self.guid
         self.pen.get_guid(tmpfile, self.guid, 0)
         z = zipfile.ZipFile(tmpfile, "r")
 
+        # XXX: cleanup temp dir
         tmpdir = tempfile.mkdtemp()
 
-        for i, name in enumerate(z.namelist()):
+        i = 0
+        for name in z.namelist():
             if not name.startswith('data/'):
                 continue
+            i += 1
             f = z.open(name)
             p = Parser(f)
 
@@ -88,7 +96,11 @@ class Notebook(object):
             fn = os.path.join(tmpdir, "page%d" % i)
             surface.write_to_png(fn)
             img = gtk.gdk.pixbuf_new_from_file(fn)
-            self.ls.append(["Page %d" % (i+1), img])
+            img = img.scale_simple(img.props.width / 10,
+                                   img.props.height / 10,
+                                   "bilinear")
+            self.ls.append(["Page %d" % i, img])
+        self.is_rendered = True
 
 class SmartpenBrowser(object):
     def pen_connect(self, *args):
