@@ -6,49 +6,30 @@ import xml.dom.minidom
 import zipfile
 import parsestf
 import tempfile
+import cairo
+import os
 
-class STFWidget(gtk.DrawingArea):
-    class Parser(parsestf.STFParser):
-        def __init__(self, stream):
-            super(STFWidget.Parser, self).__init__(stream)
-            self.last_force=0
+class Parser(parsestf.STFParser):
+    def __init__(self, stream):
+        super(Parser, self).__init__(stream)
+        self.last_force=0
 
-        def handle_stroke_end(self, time):
-            self.ctx.stroke()
-            self.last_force = 0
+    def handle_stroke_end(self, time):
+        self.ctx.stroke()
+        self.last_force = 0
 
-        def handle_point(self, x, y, f, time):
-            ctx = self.ctx
-            if f:
-                if self.last_force:
-                    ctx.line_to(x/10, y/10)
-                else:
-                    ctx.move_to(x/10, y/10)
-            self.last_force = 1
+    def handle_point(self, x, y, f, time):
+        ctx = self.ctx
+        if f:
+            if self.last_force:
+                ctx.line_to(x, y)
+            else:
+                ctx.move_to(x, y)
+        self.last_force = 1
 
-        def parse(self, ctx):
-            self.ctx = ctx
-            super(STFWidget.Parser, self).parse()
-
-    def __init__(self, *args):
-        super(STFWidget, self).__init__(*args)
-        self.connect('expose-event', self.expose)
-        self.parser = None
-        self.ctx = None
-
-    def expose(self, *args):
-        print "expose"
-        window = self.get_window()
-        ctx = window.cairo_create()
-        ctx.set_source_rgb(255, 255, 255)
-        ctx.paint()
-        ctx.set_source_rgb(0, 0, 0)
-        if self.parser is not None:
-            self.parser.parse(ctx)
-
-    def parse(self, stream):
-        p = STFWidget.Parser(stream)
-        self.parser = p
+    def parse(self, ctx):
+        self.ctx = ctx
+        super(Parser, self).parse()
 
 
 class Notebook(object):
@@ -81,15 +62,33 @@ class Notebook(object):
     def render(self):
         fd, tmpfile = tempfile.mkstemp()
         print self.guid
-        #self.pen.get_guid(tmpfile, self.guid, 0)
-        #z = zipfile.ZipFile(tmpfile, "r")
-        #f = z.open(name)
+        self.pen.get_guid(tmpfile, self.guid, 0)
+        z = zipfile.ZipFile(tmpfile, "r")
 
-        img = gtk.gdk.pixbuf_new_from_file('/home/srwalter/programs/livescribe/img1.png')
-        print img
-        self.ls.append(["Page 1", img])
-        img = gtk.gdk.pixbuf_new_from_file('/home/srwalter/programs/livescribe/img2.png')
-        self.ls.append(["Page 2", img])
+        tmpdir = tempfile.mkdtemp()
+
+        for i, name in enumerate(z.namelist()):
+            if not name.startswith('data/'):
+                continue
+            f = z.open(name)
+            p = Parser(f)
+
+            # XXX: get dimension from pen data
+            surface = cairo.ImageSurface(cairo.FORMAT_RGB24, 4963, 6278)
+            ctx = cairo.Context(surface)
+            ctx.set_source_rgb(255, 255, 255)
+            ctx.paint()
+            ctx.set_source_rgb(0,0,0)
+            try:
+                p.parse(ctx)
+            except Exception, e:
+                print "Parse error"
+                print e
+                continue
+            fn = os.path.join(tmpdir, "page%d" % i)
+            surface.write_to_png(fn)
+            img = gtk.gdk.pixbuf_new_from_file(fn)
+            self.ls.append(["Page %d" % (i+1), img])
 
 class SmartpenBrowser(object):
     def pen_connect(self, *args):
