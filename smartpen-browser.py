@@ -5,6 +5,7 @@ import pysmartpen
 import xml.dom.minidom
 import zipfile
 import parsestf
+import tempfile
 
 class STFWidget(gtk.DrawingArea):
     class Parser(parsestf.STFParser):
@@ -57,10 +58,20 @@ class Notebook(object):
         self.pen = pen
         self.pages = pages
 
-        child = STFWidget()
-        child.set_size_request(500, 500)
-        child.show()
-        self.contents = child
+        ls = gtk.ListStore(str, gtk.gdk.Pixbuf)
+        self.ls = ls
+
+        iv = gtk.IconView(ls)
+        iv.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color("gray"))
+        iv.set_text_column(0)
+        iv.set_pixbuf_column(1)
+        iv.show()
+
+        sw = gtk.ScrolledWindow()
+        sw.add(iv)
+        sw.show()
+
+        self.contents = sw
 
     def add(self, notebook):
         tab = gtk.Label(self.title)
@@ -68,20 +79,17 @@ class Notebook(object):
         notebook.append_page(self.contents, tab)
 
     def render(self):
-        #tmpfile = "tmpfile"
-        #self.pen.get_guid(tmpfile, self.guid)
-        tmpfile = file("/home/srwalter/programs/livescribe/data")
-        z = zipfile.ZipFile(tmpfile, "r")
+        fd, tmpfile = tempfile.mkstemp()
+        print self.guid
+        #self.pen.get_guid(tmpfile, self.guid, 0)
+        #z = zipfile.ZipFile(tmpfile, "r")
+        #f = z.open(name)
 
-        name = None
-        addr = self.pages[0]
-        for fn in z.namelist():
-            #if addr in fn:
-            if fn.startswith('data/'):
-                name = fn
-                break
-        f = z.open(name)
-        self.contents.parse(f)
+        img = gtk.gdk.pixbuf_new_from_file('/home/srwalter/programs/livescribe/img1.png')
+        print img
+        self.ls.append(["Page 1", img])
+        img = gtk.gdk.pixbuf_new_from_file('/home/srwalter/programs/livescribe/img2.png')
+        self.ls.append(["Page 2", img])
 
 class SmartpenBrowser(object):
     def pen_connect(self, *args):
