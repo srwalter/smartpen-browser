@@ -148,19 +148,25 @@ class SmartpenBrowser(object):
         tabs = self.builder.get_object('notebook1')
         tabs.connect('switch-page', self.switch_page, notebooks)
 
+        lsps = {}
         for elm in cl.getElementsByTagName('lsp'):
             guid = elm.getAttribute('guid')
             if not guid:
                 continue
 
-            title = elm.getAttribute('title')
+            if guid not in lsps:
+                lsps[guid] = {}
+                lsps[guid]['pages'] = []
 
-            pages = []
+            title = elm.getAttribute('title')
+            lsps[guid]['title'] = title
+
             for p in elm.getElementsByTagName('page'):
                 addr = p.getAttribute('pageaddress')
-                pages.insert(0, addr)
+                lsps[guid]['pages'].insert(0, addr)
 
-            nb = Notebook(self.pen, guid, title, pages)
+        for guid, value in lsps.items():
+            nb = Notebook(self.pen, guid, value['title'], value['pages'])
             notebooks.append(nb)
             nb.add(tabs)
         pass
