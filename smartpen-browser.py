@@ -11,6 +11,7 @@ import os
 import threading
 import thread
 import gobject
+import subprocess
 
 gobject.threads_init()
 
@@ -45,7 +46,7 @@ class Notebook(object):
         self.pages = pages
         self.is_rendered = False
 
-        ls = gtk.ListStore(str, gtk.gdk.Pixbuf)
+        ls = gtk.ListStore(str, gtk.gdk.Pixbuf, str)
         self.ls = ls
 
         # XXX: cleanup temp dir
@@ -58,16 +59,22 @@ class Notebook(object):
         self.thread = thread.start_new_thread(self.worker_thread, args)
 
         iv = gtk.IconView(ls)
+        iv.connect('item-activated', self.page_activated)
         iv.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color("gray"))
         iv.set_text_column(0)
         iv.set_pixbuf_column(1)
         iv.show()
 
         sw = gtk.ScrolledWindow()
+        sw.props.hscrollbar_policy = "never"
         sw.add(iv)
         sw.show()
 
         self.contents = sw
+
+    def page_activated(self, iv, path):
+        fn = self.ls[path][2]
+        subprocess.call(["gnome-open", fn])
 
     def worker_thread(self):
         tmpdir = self.tmpdir
@@ -80,7 +87,6 @@ class Notebook(object):
 
             i, f, name = work
             if i is None and f is None and name is None:
-                print "Thread done"
                 break
 
             p = Parser(f)
@@ -99,10 +105,10 @@ class Notebook(object):
             fn = os.path.join(tmpdir, "page%d" % i)
             surface.write_to_png(fn)
             img = gtk.gdk.pixbuf_new_from_file(fn)
-            img = img.scale_simple(img.props.width / 10,
-                                   img.props.height / 10,
+            img = img.scale_simple(img.props.width / 20,
+                                   img.props.height / 20,
                                    "bilinear")
-            self.ls.append(["Page %d" % i, img])
+            self.ls.append(["Page %d" % i, img, fn])
 
     def add(self, notebook):
         tab = gtk.Label(self.title)
@@ -172,7 +178,6 @@ class SmartpenBrowser(object):
         pass
 
     def switch_page(self, notebook, page, page_num, notebooks):
-        print "switch page %d" % page_num
         notebooks[page_num].render()
 
     def pen_disconnect(self, *args):
