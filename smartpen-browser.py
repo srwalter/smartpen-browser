@@ -8,6 +8,11 @@ import parsestf
 import tempfile
 import cairo
 import os
+import threading
+import thread
+import gobject
+
+gobject.threads_init()
 
 class Parser(parsestf.STFParser):
     def __init__(self, stream):
@@ -43,6 +48,15 @@ class Notebook(object):
         ls = gtk.ListStore(str, gtk.gdk.Pixbuf)
         self.ls = ls
 
+        # XXX: cleanup temp dir
+        self.tmpdir = tempfile.mkdtemp()
+
+        self.work_queue = []
+        self.work_queue_lock = threading.Lock()
+        self.work_queue_sem = threading.Semaphore(0)
+        args = tuple()
+        self.thread = thread.start_new_thread(self.worker_thread, args)
+
         iv = gtk.IconView(ls)
         iv.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color("gray"))
         iv.set_text_column(0)
@@ -55,30 +69,20 @@ class Notebook(object):
 
         self.contents = sw
 
-    def add(self, notebook):
-        tab = gtk.Label(self.title)
-        tab.show()
-        notebook.append_page(self.contents, tab)
+    def worker_thread(self):
+        tmpdir = self.tmpdir
 
-    def render(self):
-        if is_rendered is True:
-            return
+        while True:
+            self.work_queue_sem.acquire()
+            self.work_queue_lock.acquire()
+            work = self.work_queue.pop(0)
+            self.work_queue_lock.release()
 
-        # XXX: cleanup temp file
-        fd, tmpfile = tempfile.mkstemp()
-        print self.guid
-        self.pen.get_guid(tmpfile, self.guid, 0)
-        z = zipfile.ZipFile(tmpfile, "r")
+            i, f, name = work
+            if i is None and f is None and name is None:
+                print "Thread done"
+                break
 
-        # XXX: cleanup temp dir
-        tmpdir = tempfile.mkdtemp()
-
-        i = 0
-        for name in z.namelist():
-            if not name.startswith('data/'):
-                continue
-            i += 1
-            f = z.open(name)
             p = Parser(f)
 
             # XXX: get dimension from pen data
@@ -92,7 +96,6 @@ class Notebook(object):
             except Exception, e:
                 print "Parse error"
                 print e
-                continue
             fn = os.path.join(tmpdir, "page%d" % i)
             surface.write_to_png(fn)
             img = gtk.gdk.pixbuf_new_from_file(fn)
@@ -100,7 +103,37 @@ class Notebook(object):
                                    img.props.height / 10,
                                    "bilinear")
             self.ls.append(["Page %d" % i, img])
+
+    def add(self, notebook):
+        tab = gtk.Label(self.title)
+        tab.show()
+        notebook.append_page(self.contents, tab)
+
+    def render(self):
+        if self.is_rendered is True:
+            return
+
+        fd, tmpfile = tempfile.mkstemp()
+        self.pen.get_guid(tmpfile, self.guid, 0)
+        z = zipfile.ZipFile(tmpfile, "r")
+
+        i = 0
+        for name in z.namelist():
+            if not name.startswith('data/'):
+                continue
+            i += 1
+            f = z.open(name)
+            self.work_queue_lock.acquire()
+            self.work_queue.append([i, f, name])
+            self.work_queue_sem.release()
+            self.work_queue_lock.release()
+
+        self.work_queue_lock.acquire()
+        self.work_queue.append([None, None, None])
+        self.work_queue_sem.release()
+        self.work_queue_lock.release()
         self.is_rendered = True
+        os.unlink(tmpfile)
 
 class SmartpenBrowser(object):
     def pen_connect(self, *args):
@@ -119,7 +152,6 @@ class SmartpenBrowser(object):
             guid = elm.getAttribute('guid')
             if not guid:
                 continue
-            print guid
 
             title = elm.getAttribute('title')
 
@@ -157,13 +189,6 @@ class SmartpenBrowser(object):
 
         elem = info.getElementsByTagName('version')[0]
         swrev = elem.getAttribute('swrev')
-
-        print penid
-        print voltage
-        print battlevel
-        print freemem
-        print totalmem
-        print swrev
 
         freemem = int(freemem)
         totalmem = int(totalmem)
