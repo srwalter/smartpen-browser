@@ -143,7 +143,15 @@ class Notebook(object):
 
 class SmartpenBrowser(object):
     def pen_connect(self, *args):
-        self.pen.connect()
+        try:
+            self.pen.connect()
+        except:
+            dlg = gtk.MessageDialog(self.window, 0, "error", gtk.BUTTONS_OK,
+                    "Failed to connect to the pen.  Check permissions")
+            dlg.run()
+            dlg.destroy()
+            return
+
         self.connected = True
 
         changes = self.pen.get_changelist()
@@ -238,6 +246,7 @@ class SmartpenBrowser(object):
         self.pen = pen
 
         window = builder.get_object("window1")
+        self.window = window
         window.connect('delete-event', self.quit)
         window.set_size_request(640, 480)
         window.show_all()
