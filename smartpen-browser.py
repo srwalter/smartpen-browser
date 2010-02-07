@@ -216,6 +216,8 @@ class SmartpenBrowser(object):
         pass
 
     def switch_page(self, notebook, page, page_num, notebooks):
+        while gtk.events_pending():
+            gtk.main_iteration()
         notebooks[page_num].render()
 
     def pen_disconnect(self, *args):
