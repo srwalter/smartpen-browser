@@ -81,6 +81,14 @@ class Notebook(object):
     def worker_thread(self):
         tmpdir = self.tmpdir
 
+        def make_progress():
+            if self.progress_bar:
+                frac = self.progress_bar.get_fraction()
+                frac *= self.progress_bar.props.discrete_blocks
+                frac += 1
+                frac /= float(self.progress_bar.props.discrete_blocks)
+                self.progress_bar.set_fraction(frac)
+
         while True:
             self.work_queue_sem.acquire()
             self.work_queue_lock.acquire()
@@ -103,24 +111,23 @@ class Notebook(object):
             ctx.set_source_rgb(255, 255, 255)
             ctx.paint()
             ctx.set_source_rgb(0,0,0)
+            make_progress()
             try:
                 p.parse(ctx)
             except Exception, e:
                 print "Parse error"
                 print e
+            make_progress()
             fn = os.path.join(tmpdir, "page%d" % i)
             surface.write_to_png(fn)
+            make_progress()
             img = gtk.gdk.pixbuf_new_from_file(fn)
             img = img.scale_simple(img.props.width / 20,
                                    img.props.height / 20,
                                    "bilinear")
-            if self.progress_bar:
-                frac = self.progress_bar.get_fraction()
-                frac *= self.progress_bar.props.discrete_blocks
-                frac += 1
-                frac /= float(self.progress_bar.props.discrete_blocks)
-                self.progress_bar.set_fraction(frac)
+            make_progress()
             self.ls.append(["Page %d" % i, img, fn])
+            make_progress()
             if self.status_bar:
                 ctx = self.status_bar.get_context_id("THREAD")
                 self.status_bar.pop(ctx)
@@ -153,7 +160,7 @@ class Notebook(object):
             self.work_queue_lock.release()
 
         if self.progress_bar:
-            self.progress_bar.props.discrete_blocks = i
+            self.progress_bar.props.discrete_blocks = i * 5
 
         self.work_queue_lock.acquire()
         self.work_queue.append([None, None, None])
