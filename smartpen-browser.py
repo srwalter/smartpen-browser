@@ -39,12 +39,13 @@ class Parser(parsestf.STFParser):
 
 
 class Notebook(object):
-    def __init__(self, pen, guid, title, pages):
+    def __init__(self, pen, guid, title, pages, sb=None):
         self.guid = guid
         self.title = title
         self.pen = pen
         self.pages = pages
         self.is_rendered = False
+        self.status_bar = sb
 
         ls = gtk.ListStore(str, gtk.gdk.Pixbuf, str)
         self.ls = ls
@@ -89,6 +90,10 @@ class Notebook(object):
             if i is None and f is None and name is None:
                 break
 
+            if self.status_bar:
+                ctx = self.status_bar.get_context_id("THREAD")
+                self.status_bar.push(ctx, "Rendering page %d..." % i)
+
             p = Parser(f)
 
             # XXX: get dimension from pen data
@@ -109,6 +114,9 @@ class Notebook(object):
                                    img.props.height / 20,
                                    "bilinear")
             self.ls.append(["Page %d" % i, img, fn])
+            if self.status_bar:
+                ctx = self.status_bar.get_context_id("THREAD")
+                self.status_bar.pop(ctx)
 
     def add(self, notebook):
         tab = gtk.Label(self.title)
@@ -179,8 +187,9 @@ class SmartpenBrowser(object):
                 addr = p.getAttribute('pageaddress')
                 lsps[guid]['pages'].insert(0, addr)
 
+        sb = self.builder.get_object('statusbar1')
         for guid, value in lsps.items():
-            nb = Notebook(self.pen, guid, value['title'], value['pages'])
+            nb = Notebook(self.pen, guid, value['title'], value['pages'], sb)
             notebooks.append(nb)
             nb.add(tabs)
         pass
