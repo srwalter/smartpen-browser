@@ -39,13 +39,14 @@ class Parser(parsestf.STFParser):
 
 
 class Notebook(object):
-    def __init__(self, pen, guid, title, pages, sb=None):
+    def __init__(self, pen, guid, title, pages, sb=None, pb=None):
         self.guid = guid
         self.title = title
         self.pen = pen
         self.pages = pages
         self.is_rendered = False
         self.status_bar = sb
+        self.progress_bar = pb
 
         ls = gtk.ListStore(str, gtk.gdk.Pixbuf, str)
         self.ls = ls
@@ -102,21 +103,32 @@ class Notebook(object):
             ctx.set_source_rgb(255, 255, 255)
             ctx.paint()
             ctx.set_source_rgb(0,0,0)
+            if self.progress_bar:
+                self.progress_bar.pulse()
             try:
                 p.parse(ctx)
             except Exception, e:
                 print "Parse error"
                 print e
+            if self.progress_bar:
+                self.progress_bar.pulse()
             fn = os.path.join(tmpdir, "page%d" % i)
             surface.write_to_png(fn)
+            if self.progress_bar:
+                self.progress_bar.pulse()
             img = gtk.gdk.pixbuf_new_from_file(fn)
             img = img.scale_simple(img.props.width / 20,
                                    img.props.height / 20,
                                    "bilinear")
+            if self.progress_bar:
+                self.progress_bar.pulse()
             self.ls.append(["Page %d" % i, img, fn])
             if self.status_bar:
                 ctx = self.status_bar.get_context_id("THREAD")
                 self.status_bar.pop(ctx)
+
+        if self.progress_bar:
+            self.progress_bar.set_fraction(0.0)
 
     def add(self, notebook):
         tab = gtk.Label(self.title)
@@ -188,8 +200,9 @@ class SmartpenBrowser(object):
                 lsps[guid]['pages'].insert(0, addr)
 
         sb = self.builder.get_object('statusbar1')
+        pb = self.builder.get_object('progressbar1')
         for guid, value in lsps.items():
-            nb = Notebook(self.pen, guid, value['title'], value['pages'], sb)
+            nb = Notebook(self.pen, guid, value['title'], value['pages'], sb, pb)
             notebooks.append(nb)
             nb.add(tabs)
         pass
