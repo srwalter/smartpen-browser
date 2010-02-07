@@ -391,4 +391,21 @@
     <property name="stock_id">gtk-quit</property>
     <signal name="activate" handler="on_quit_clicked"/>
   </object>
+  <object class="GtkMenu" id="imgmenu">
+    <property name="visible">True</property>
+    <child>
+      <object class="GtkMenuItem" id="view">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">View Full Size...</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="export">
+        <property name="visible">True</property>
+        <property name="label" translatable="yes">Export to PDF...</property>
+        <property name="use_underline">True</property>
+      </object>
+    </child>
+  </object>
 </interface>

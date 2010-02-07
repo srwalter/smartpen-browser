@@ -39,7 +39,7 @@ class Parser(parsestf.STFParser):
 
 
 class Notebook(object):
-    def __init__(self, pen, guid, title, pages, sb=None, pb=None):
+    def __init__(self, pen, guid, title, pages, popup, sb=None, pb=None):
         self.guid = guid
         self.title = title
         self.pen = pen
@@ -47,6 +47,7 @@ class Notebook(object):
         self.is_rendered = False
         self.status_bar = sb
         self.progress_bar = pb
+        self.popup = popup
 
         ls = gtk.ListStore(str, gtk.gdk.Pixbuf, str)
         self.ls = ls
@@ -62,6 +63,7 @@ class Notebook(object):
 
         iv = gtk.IconView(ls)
         iv.connect('item-activated', self.page_activated)
+        iv.connect('button-press-event', self.page_popup)
         iv.modify_base(gtk.STATE_NORMAL, gtk.gdk.Color("gray"))
         iv.set_text_column(0)
         iv.set_pixbuf_column(1)
@@ -73,6 +75,17 @@ class Notebook(object):
         sw.show()
 
         self.contents = sw
+
+    def page_popup(self, widget, event):
+        if event.button != 3:
+            return None
+
+        x = event.x
+        y = event.y
+        path = widget.get_path_at_pos(x, y)
+        widget.set_cursor(path)
+        self.popup.popup(None, None, None, event.button, event.time)
+        return True
 
     def page_activated(self, iv, path):
         fn = self.ls[path][2]
@@ -209,8 +222,10 @@ class SmartpenBrowser(object):
 
         sb = self.builder.get_object('statusbar1')
         pb = self.builder.get_object('progressbar1')
+        popup = self.builder.get_object('imgmenu')
         for guid, value in lsps.items():
-            nb = Notebook(self.pen, guid, value['title'], value['pages'], sb, pb)
+            nb = Notebook(self.pen, guid, value['title'], value['pages'],
+                    popup, sb, pb)
             notebooks.append(nb)
             nb.add(tabs)
         pass
