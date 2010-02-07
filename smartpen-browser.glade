@@ -21,29 +21,26 @@
                     <property name="visible">True</property>
                     <child>
                       <object class="GtkImageMenuItem" id="connect">
-                        <property name="label" translatable="yes">_Connect</property>
                         <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="image">image1</property>
-                        <property name="use_stock">False</property>
+                        <property name="related_action">ActConnect</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="disconnect">
-                        <property name="label" translatable="yes">_Disconnect</property>
                         <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="image">image2</property>
-                        <property name="use_stock">False</property>
+                        <property name="related_action">ActDisconnect</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
                       </object>
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="peninfo">
-                        <property name="label" translatable="yes">Pen _Info</property>
                         <property name="visible">True</property>
-                        <property name="use_underline">True</property>
-                        <property name="image">image3</property>
-                        <property name="use_stock">False</property>
+                        <property name="related_action">ActInfo</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_stock">True</property>
                       </object>
                     </child>
                     <child>
@@ -53,9 +50,9 @@
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="quit">
-                        <property name="label">gtk-quit</property>
                         <property name="visible">True</property>
-                        <property name="use_underline">True</property>
+                        <property name="related_action">ActQuit</property>
+                        <property name="use_action_appearance">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -90,6 +87,15 @@
           </packing>
         </child>
         <child>
+          <object class="GtkToolbar" id="toolbar1">
+            <property name="visible">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkNotebook" id="notebook1">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -113,7 +119,7 @@
             </child>
           </object>
           <packing>
-            <property name="position">1</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -123,23 +129,11 @@
           </object>
           <packing>
             <property name="expand">False</property>
-            <property name="position">2</property>
+            <property name="position">3</property>
           </packing>
         </child>
       </object>
     </child>
-  </object>
-  <object class="GtkImage" id="image1">
-    <property name="visible">True</property>
-    <property name="stock">gtk-missing-image</property>
-  </object>
-  <object class="GtkImage" id="image2">
-    <property name="visible">True</property>
-    <property name="stock">gtk-missing-image</property>
-  </object>
-  <object class="GtkImage" id="image3">
-    <property name="visible">True</property>
-    <property name="stock">gtk-missing-image</property>
   </object>
   <object class="GtkAboutDialog" id="aboutwin">
     <property name="border_width">5</property>
@@ -309,5 +303,30 @@
     <action-widgets>
       <action-widget response="0">button1</action-widget>
     </action-widgets>
+  </object>
+  <object class="GtkActionGroup" id="actiongroup1"/>
+  <object class="GtkAction" id="ActConnect">
+    <property name="label">Connect</property>
+    <property name="tooltip">Connect to pen</property>
+    <property name="stock_id">gtk-connect</property>
+    <signal name="activate" handler="on_connect_clicked"/>
+  </object>
+  <object class="GtkAction" id="ActDisconnect">
+    <property name="label">Disconnect</property>
+    <property name="tooltip">Disconnect from pen</property>
+    <property name="stock_id">gtk-disconnect</property>
+    <signal name="activate" handler="on_disconnect_clicked"/>
+  </object>
+  <object class="GtkAction" id="ActInfo">
+    <property name="label">Pen Info</property>
+    <property name="tooltip">Retrieve pen information</property>
+    <property name="stock_id">gtk-about</property>
+    <signal name="activate" handler="on_info_clicked"/>
+  </object>
+  <object class="GtkAction" id="ActQuit">
+    <property name="label">Quit</property>
+    <property name="tooltip">Exit the program</property>
+    <property name="stock_id">gtk-quit</property>
+    <signal name="activate" handler="on_quit_clicked"/>
   </object>
 </interface>

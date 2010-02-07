@@ -251,6 +251,14 @@ class SmartpenBrowser(object):
         self.builder = builder
         self.connected = False
 
+        cbs = {
+                'on_connect_clicked': self.pen_connect,
+                'on_disconnect_clicked': self.pen_disconnect,
+                'on_info_clicked': self.pen_info,
+                'on_quit_clicked': self.quit,
+        }
+        builder.connect_signals(cbs)
+
         pen = pysmartpen.Smartpen()
         self.pen = pen
 
@@ -259,18 +267,6 @@ class SmartpenBrowser(object):
         window.connect('delete-event', self.quit)
         window.set_size_request(640, 480)
         window.show_all()
-
-        mi = builder.get_object("quit")
-        mi.connect('activate', self.quit)
-
-        mi = builder.get_object("connect")
-        mi.connect('activate', self.pen_connect)
-
-        mi = builder.get_object("disconnect")
-        mi.connect('activate', self.pen_disconnect)
-
-        mi = builder.get_object("peninfo")
-        mi.connect('activate', self.pen_info)
 
         mi = builder.get_object("about-mi")
         mi.connect('activate', self.about)
