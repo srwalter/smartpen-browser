@@ -15,6 +15,19 @@ import subprocess
 
 gobject.threads_init()
 
+class ImagePopup(gtk.Menu):
+    def __init__(self, view_cb, pdf_cb):
+        super(gtk.Menu, self).__init__()
+
+        mi = gtk.MenuItem('View Full Size...')
+        mi.connect('activate', view_cb)
+        mi.show()
+        self.append(mi)
+        mi = gtk.MenuItem('Export as PDF...')
+        mi.connect('activate', pdf_cb)
+        mi.show()
+        self.append(mi)
+
 class Parser(parsestf.STFParser):
     def __init__(self, stream):
         super(Parser, self).__init__(stream)
@@ -39,15 +52,15 @@ class Parser(parsestf.STFParser):
 
 
 class Notebook(object):
-    def __init__(self, pen, guid, title, pages, popup, sb=None, pb=None):
+    def __init__(self, pen, guid, title, pages, builder):
         self.guid = guid
         self.title = title
         self.pen = pen
         self.pages = pages
         self.is_rendered = False
-        self.status_bar = sb
-        self.progress_bar = pb
-        self.popup = popup
+        self.status_bar = builder.get_object('statusbar1')
+        self.progress_bar = builder.get_object('progressbar1')
+        self.builder = builder
 
         ls = gtk.ListStore(str, gtk.gdk.Pixbuf, str)
         self.ls = ls
@@ -76,18 +89,27 @@ class Notebook(object):
 
         self.contents = sw
 
-    def page_popup(self, widget, event):
+    def page_popup(self, iv, event):
         if event.button != 3:
             return None
 
         x = event.x
         y = event.y
-        path = widget.get_path_at_pos(x, y)
-        widget.set_cursor(path)
-        self.popup.popup(None, None, None, event.button, event.time)
+        path = iv.get_path_at_pos(x, y)
+        iv.set_cursor(path)
+
+        def view_cb(*args):
+            self._page_activated(path)
+        def pdf_cb(*args):
+            pass
+        popup = ImagePopup(view_cb, pdf_cb)
+        popup.popup(None, None, None, event.button, event.time)
         return True
 
     def page_activated(self, iv, path):
+        self._page_activated(path)
+
+    def _page_activated(self, path):
         fn = self.ls[path][2]
         subprocess.call(["gnome-open", fn])
 
@@ -220,12 +242,9 @@ class SmartpenBrowser(object):
                 addr = p.getAttribute('pageaddress')
                 lsps[guid]['pages'].insert(0, addr)
 
-        sb = self.builder.get_object('statusbar1')
-        pb = self.builder.get_object('progressbar1')
-        popup = self.builder.get_object('imgmenu')
         for guid, value in lsps.items():
             nb = Notebook(self.pen, guid, value['title'], value['pages'],
-                    popup, sb, pb)
+                    self.builder)
             notebooks.append(nb)
             nb.add(tabs)
         pass
