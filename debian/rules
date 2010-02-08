@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+
+DEB_PYTHON_SYSTEM = pysupport
+include /usr/share/cdbs/1/class/python-distutils.mk
+include /usr/share/cdbs/1/class/makefile.mk
+
+DEB_MAKE_CLEAN_TARGET = 
+DEB_MAKE_BUILD_TARGET = 
+DEB_MAKE_INSTALL_TARGET = install DESTDIR=$(CURDIR)/debian/smartpen-browser
+DEB_MAKE_CHECK_TARGET = 
+
+# Add here any variable or target overrides you need.

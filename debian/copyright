@@ -1,0 +1,25 @@
+This package was debianized by Steven Walter <srwalter@dervierte> on
+Sun, 07 Feb 2010 21:07:56 -0500.
+
+Upstream Author(s):
+
+    Steven Walter <stevenrwalter@gmail.com
+    <likewise for another author>
+
+Copyright:
+
+    Copyright (C) 2010 Steven Walter
+
+License:
+
+    GPL version 2
+
+The Debian packaging is:
+
+    Copyright (C) 2010 Steven Walter <srwalter@dervierte>
+
+and is licensed under the GPL version 3, 
+see `/usr/share/common-licenses/GPL-3'.
+
+# Please also look if there are files or directories which have a
+# different copyright/license attached and list them here.

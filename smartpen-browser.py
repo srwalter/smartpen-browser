@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2.6
 
 import gtk
 import pysmartpen
@@ -117,8 +117,6 @@ class Notebook(object):
             if resp != gtk.RESPONSE_OK:
                 return
 
-            print filename
-
             fd, tmpfile = tempfile.mkstemp()
             self.pen.get_guid(tmpfile, self.guid, 0)
             z = zipfile.ZipFile(tmpfile, "r")
@@ -136,7 +134,6 @@ class Notebook(object):
                 print "Parse error"
                 print e
             os.unlink(tmpfile)
-            print "Done"
 
         popup = ImagePopup(view_cb, pdf_cb)
         popup.popup(None, None, None, event.button, event.time)
@@ -340,7 +337,10 @@ class SmartpenBrowser(object):
 
     def __init__(self):
         builder = gtk.Builder()
-        builder.add_from_file("smartpen-browser.glade")
+        try:
+            builder.add_from_file("smartpen-browser.glade")
+        except:
+            builder.add_from_file("/usr/share/smartpen-browser/smartpen-browser.glade")
         self.builder = builder
         self.connected = False
 

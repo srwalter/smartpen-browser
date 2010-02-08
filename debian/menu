@@ -1,0 +1,2 @@
+?package(smartpen-browser):needs="X11" section="Applications/Graphics"\
+  title="Smartpen Browser" command="/usr/bin/smartpen-browser.py"

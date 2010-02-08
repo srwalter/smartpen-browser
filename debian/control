@@ -1,0 +1,13 @@
+Source: smartpen-browser
+Section: unknown
+Priority: extra
+Maintainer: Steven Walter <srwalter@dervierte>
+Build-Depends: cdbs, debhelper (>= 7)
+Standards-Version: 3.8.1
+Homepage: <insert the upstream URL, if relevant>
+
+Package: smartpen-browser
+Architecture: any
+Depends: libsmartpen
+Description: Smartpen Browser
+ Tool for viewing pages and exporting PDFs from a smart pen

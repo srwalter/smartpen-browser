@@ -1,0 +1,5 @@
+smartpen-browser (0.1-1) unstable; urgency=low
+
+  * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
+
+ -- Steven Walter <stevenrwalter@gmail.com>  Sun, 07 Feb 2010 21:07:56 -0500
