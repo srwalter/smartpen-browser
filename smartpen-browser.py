@@ -62,7 +62,7 @@ class Notebook(object):
         self.progress_bar = builder.get_object('progressbar1')
         self.builder = builder
 
-        ls = gtk.ListStore(str, gtk.gdk.Pixbuf, str)
+        ls = gtk.ListStore(str, gtk.gdk.Pixbuf, str, str)
         self.ls = ls
 
         # XXX: cleanup temp dir
@@ -100,8 +100,44 @@ class Notebook(object):
 
         def view_cb(*args):
             self._page_activated(path)
+
         def pdf_cb(*args):
-            pass
+            dlg = gtk.FileChooserDialog(title="Save As...",
+                    action=gtk.FILE_CHOOSER_ACTION_SAVE,
+                    buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,
+                             gtk.STOCK_SAVE,gtk.RESPONSE_OK))
+            filter = gtk.FileFilter()
+            filter.set_name("PDF")
+            filter.add_pattern("*.pdf")
+            dlg.add_filter(filter)
+            resp = dlg.run()
+            filename = dlg.get_filename()
+            dlg.destroy()
+
+            if resp != gtk.RESPONSE_OK:
+                return
+
+            print filename
+
+            fd, tmpfile = tempfile.mkstemp()
+            self.pen.get_guid(tmpfile, self.guid, 0)
+            z = zipfile.ZipFile(tmpfile, "r")
+            name = self.ls[path][3]
+            f = z.open(name)
+            p = Parser(f)
+            surface = cairo.PDFSurface(filename, 4963,6278)
+            ctx = cairo.Context(surface)
+            ctx.set_source_rgb(255,255,255)
+            ctx.paint()
+            ctx.set_source_rgb(0,0,0)
+            try:
+                p.parse(ctx)
+            except Exception, e:
+                print "Parse error"
+                print e
+            os.unlink(tmpfile)
+            print "Done"
+
         popup = ImagePopup(view_cb, pdf_cb)
         popup.popup(None, None, None, event.button, event.time)
         return True
@@ -161,7 +197,7 @@ class Notebook(object):
                                    img.props.height / 20,
                                    "bilinear")
             make_progress()
-            self.ls.append(["Page %d" % i, img, fn])
+            self.ls.append(["Page %d" % i, img, fn, name])
             make_progress()
             if self.status_bar:
                 ctx = self.status_bar.get_context_id("THREAD")
