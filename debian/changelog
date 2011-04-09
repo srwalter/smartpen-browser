@@ -1,4 +1,22 @@
-smartpen-browser (0.1-1) unstable; urgency=low
+smartpen-browser (0.2-1) maverick; urgency=low
+
+  * Look for alternate USB ids
+
+ -- Steven Walter <stevenrwalter@gmail.com>  Sat, 09 Apr 2011 21:07:56 -0500
+
+smartpen-browser (0.1-4) maverick; urgency=low
+
+  * Bump for maverick
+
+ -- Steven Walter <stevenrwalter@gmail.com>  Tue, 29 Mar 2011 21:07:56 -0500
+
+smartpen-browser (0.1-3) lucid; urgency=low
+
+  * Bump for lucid
+
+ -- Steven Walter <stevenrwalter@gmail.com>  Thu, 15 Apr 2010 21:07:56 -0500
+
+smartpen-browser (0.1-2) karmic; urgency=low
 
   * Initial release (Closes: #nnnn)  <nnnn is the bug number of your ITP>
 

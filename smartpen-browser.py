@@ -239,16 +239,20 @@ class Notebook(object):
 
 class SmartpenBrowser(object):
     def pen_connect(self, *args):
-        try:
-            self.pen.connect()
-        except:
+        usbids = [ 0x1010, 0x1020, 0x1032 ]
+        for id in usbids:
+            try:
+                self.pen.connect(product=id)
+                self.connected = True
+            except:
+                continue
+
+        if not self.connected:
             dlg = gtk.MessageDialog(self.window, 0, "error", gtk.BUTTONS_OK,
                     "Failed to connect to the pen.  Check permissions")
             dlg.run()
             dlg.destroy()
             return
-
-        self.connected = True
 
         changes = self.pen.get_changelist()
         dom = xml.dom.minidom.parseString(changes)
