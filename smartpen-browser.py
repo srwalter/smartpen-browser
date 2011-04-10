@@ -239,7 +239,7 @@ class Notebook(object):
 
 class SmartpenBrowser(object):
     def pen_connect(self, *args):
-        usbids = [ 0x1010, 0x1020, 0x1032 ]
+        usbids = [ 0x1010, 0x1020, 0x1030, 0x1032 ]
         for id in usbids:
             try:
                 self.pen.connect(product=id)
