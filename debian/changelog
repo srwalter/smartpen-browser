@@ -1,3 +1,9 @@
+smartpen-browser (0.3-1) maverick; urgency=low
+
+  * Implement audio download
+
+ -- Steven Walter <stevenrwalter@gmail.com>  Sat, 09 Apr 2011 21:07:56 -0500
+
 smartpen-browser (0.2-1) maverick; urgency=low
 
   * Look for alternate USB ids

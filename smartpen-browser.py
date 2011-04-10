@@ -295,6 +295,80 @@ class SmartpenBrowser(object):
         self.pen.disconnect()
         self.connected = False
 
+    def pen_audio(self, *args):
+        if not self.connected:
+            dlg = gtk.MessageDialog(self.window, 0, "error", gtk.BUTTONS_OK,
+                    "Connect to a pen first")
+            dlg.run()
+            dlg.destroy()
+            return
+
+        dlg = gtk.FileChooserDialog(title="Save As...",
+                action=gtk.FILE_CHOOSER_ACTION_CREATE_FOLDER,
+                buttons=(gtk.STOCK_CANCEL,gtk.RESPONSE_CANCEL,
+                         gtk.STOCK_SAVE,gtk.RESPONSE_OK))
+        resp = dlg.run()
+        dirname = dlg.get_filenames()[0]
+        dlg.destroy()
+
+        if resp != gtk.RESPONSE_OK:
+            return
+
+        done = [ False ]
+
+        def copy_fds(f_in, f_out):
+            while True:
+                data = f_in.read(4096)
+                if not data:
+                    break
+                f_out.write(data)
+
+        def background_thread(done):
+            fd, tmpfile = tempfile.mkstemp()
+            self.pen.get_paperreplay(tmpfile, 0)
+            z = zipfile.ZipFile(tmpfile, "r")
+
+            i = 0
+            for name in z.namelist():
+                if not name.endswith('.aac'):
+                    continue
+                f_in = z.open(name)
+                f_out = file(os.path.join(dirname, "recording-%d.aac" % i), "wb")
+                copy_fds(f_in, f_out)
+                i += 1
+
+            done[0] = True
+
+        dlg = gtk.Dialog("Downloading Audio...", None, 0, tuple())
+        box = dlg.get_child()
+        widget = gtk.Label("Downloading audio, this may take several minutes.")
+        box.pack_start(widget, False, False, 0)
+        widget = gtk.ProgressBar()
+        box.pack_start(widget, False, False, 0)
+        dlg.show_all()
+
+        while gtk.events_pending():
+            gtk.main_iteration()
+
+        args = (done,)
+        self.audio_thread = thread.start_new_thread(background_thread, args)
+
+        while done[0] is False:
+            # wait for thread to finish
+            import time
+            time.sleep(0.25)
+            while gtk.events_pending():
+                gtk.main_iteration()
+            widget.pulse()
+
+        dlg.destroy()
+
+        dlg = gtk.MessageDialog(self.window, 0, "info", gtk.BUTTONS_OK,
+                "Audio download complete")
+        dlg.run()
+        dlg.destroy()
+        return
+
     def pen_info(self, *args):
         info = self.pen.get_info()
         dom = xml.dom.minidom.parseString(info)
@@ -351,6 +425,7 @@ class SmartpenBrowser(object):
         cbs = {
                 'on_connect_clicked': self.pen_connect,
                 'on_disconnect_clicked': self.pen_disconnect,
+                'on_audio_clicked': self.pen_audio,
                 'on_info_clicked': self.pen_info,
                 'on_quit_clicked': self.quit,
         }

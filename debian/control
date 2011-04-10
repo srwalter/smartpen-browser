@@ -6,7 +6,7 @@ Build-Depends: cdbs, debhelper (>= 7), python, python-support
 Standards-Version: 3.8.1
 
 Package: smartpen-browser
-Architecture: any
-Depends: libsmartpen, python-gtk2
+Architecture: all
+Depends: libsmartpen (>= 0.4), python-gtk2
 Description: Smartpen Browser
  Tool for viewing pages and exporting PDFs from a smart pen

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="2.16"/>
   <!-- interface-naming-policy project-wide -->
@@ -7,7 +7,6 @@
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <child>
           <object class="GtkMenuBar" id="menubar1">
             <property name="visible">True</property>
@@ -24,6 +23,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">ActConnect</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -32,6 +32,16 @@
                         <property name="visible">True</property>
                         <property name="related_action">ActDisconnect</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
+                        <property name="use_stock">True</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkImageMenuItem" id="audio">
+                        <property name="visible">True</property>
+                        <property name="related_action">ActAudio</property>
+                        <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -40,6 +50,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">ActInfo</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -53,6 +64,7 @@
                         <property name="visible">True</property>
                         <property name="related_action">ActQuit</property>
                         <property name="use_action_appearance">True</property>
+                        <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                       </object>
                     </child>
@@ -108,6 +120,19 @@
                 <property name="related_action">ActDisconnect</property>
                 <property name="use_action_appearance">True</property>
                 <property name="label" translatable="yes">toolbutton2</property>
+                <property name="use_underline">True</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkToolButton" id="toolbutton5">
+                <property name="visible">True</property>
+                <property name="related_action">ActAudio</property>
+                <property name="use_action_appearance">True</property>
+                <property name="label" translatable="yes">Quit</property>
                 <property name="use_underline">True</property>
               </object>
               <packing>
@@ -200,7 +225,6 @@
   <object class="GtkAboutDialog" id="aboutwin">
     <property name="border_width">5</property>
     <property name="type_hint">normal</property>
-    <property name="has_separator">False</property>
     <property name="program_name">smartpen-browser</property>
     <property name="version">v0.1</property>
     <property name="copyright" translatable="yes">Copyright 2010</property>
@@ -209,7 +233,6 @@
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox1">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
           <placeholder/>
@@ -233,11 +256,9 @@
     <property name="title" translatable="yes">Pen Info</property>
     <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
-    <property name="has_separator">False</property>
     <child internal-child="vbox">
       <object class="GtkVBox" id="dialog-vbox2">
         <property name="visible">True</property>
-        <property name="orientation">vertical</property>
         <property name="spacing">2</property>
         <child>
           <object class="GtkTable" id="table1">
@@ -407,5 +428,11 @@
         <property name="use_underline">True</property>
       </object>
     </child>
+  </object>
+  <object class="GtkAction" id="ActAudio">
+    <property name="label">Download Audio...</property>
+    <property name="tooltip">Download PaperReplay Files</property>
+    <property name="stock_id">gtk-media-next</property>
+    <signal name="activate" handler="on_audio_clicked"/>
   </object>
 </interface>
