@@ -1,3 +1,9 @@
+smartpen-browser (0.3-2) natty; urgency=low
+
+  * Bump for natty
+
+ -- Steven Walter <stevenrwalter@gmail.com>  Thu, 07 Jul 2011 21:07:56 -0500
+
 smartpen-browser (0.3-1) maverick; urgency=low
 
   * Implement audio download
