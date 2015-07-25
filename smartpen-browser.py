@@ -95,7 +95,7 @@ class Notebook(object):
 
         x = event.x
         y = event.y
-        path = iv.get_path_at_pos(x, y)
+        path = iv.get_path_at_pos(int(x), int(y))
         iv.set_cursor(path)
 
         def view_cb(*args):
